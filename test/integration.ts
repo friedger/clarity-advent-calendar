@@ -6,6 +6,7 @@ import {
   contractPrincipalCV,
   makeContractCall,
   makeContractDeploy,
+  StacksTransaction,
   standardPrincipalCV,
   TxBroadcastResultOk,
   TxBroadcastResultRejected,
@@ -13,107 +14,65 @@ import {
 } from "@stacks/transactions";
 import { StacksTestnet } from "@stacks/network";
 import * as fs from "fs";
+import {
+  contractAddress,
+  deployContract,
+  handleTransaction,
+  network,
+  secretKey,
+} from "./deploy";
 
-export const local = true;
-export const mocknet = true;
-export const noSidecar = true;
-
-const STACKS_CORE_API_URL = local
-  ? noSidecar
-    ? "http://localhost:20443"
-    : "http://localhost:3999"
-  : "http://testnet-master.blockstack.org:20443";
-export const STACKS_API_URL = local
-  ? "http://localhost:3999"
-  : "https://stacks-node-api.blockstack.org";
-export const network = new StacksTestnet();
-network.coreApiUrl = STACKS_CORE_API_URL;
-
-const stxAddress = "ST2ZRX0K27GW0SP3GJCEMHD95TQGJMKB7G9Y0X1MH";
-const senderKey =
-  "b8d99fd45da58038d630d9855d3ca2466e8e0f89d3894c4724f0efc9ff4b51f001";
-
-export async function deployContract(contractName: string) {
-  const codeBody = fs
-    .readFileSync(`./contracts/${contractName}.clar`, { encoding: "utf-8" })
-    .toString();
-  var transaction = await makeContractDeploy({
-    contractName,
-    codeBody: codeBody,
-    senderKey,
-    network,
-  });
-  console.log(`deploy contract ${contractName}`);
-  const result = await broadcastTransaction(transaction, network);
-  console.log(result);
-  return result;
+async function deployDay(day: number) {
+  const dayString = day.toString().padStart(2, "0");
+  await deployContract(`calendar-${dayString}`);
 }
 
-function timeout(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+async function addCalendar(day: number) {
+  const dayString = day.toString().padStart(2, "0");
+  let tx = await makeContractCall({
+    contractAddress: contractAddress,
+    contractName: "calendar",
+    functionName: "update-calendar",
+    functionArgs: [
+      uintCV(day),
+      contractPrincipalCV(contractAddress, `calendar-${dayString}`),
+    ],
+    senderKey: secretKey,
+    network,
+  });
+  await handleTransaction(tx);
+
+  tx = await makeContractCall({
+    contractAddress: contractAddress,
+    contractName: "calendar",
+    functionName: "open-door",
+    functionArgs: [
+      uintCV(day),
+      contractPrincipalCV(contractAddress, `calendar-${dayString}`),
+    ],
+    senderKey: secretKey,
+    network,
+  });
+  await handleTransaction(tx);
 }
 
 describe("calendar test suite", () => {
   before("deploys", async () => {
-    let result = await deployContract("calendar");
-    if (!((result as unknown) as TxBroadcastResultRejected).error) {
-      await timeout(10000);
-    }
-    result = await deployContract("calendar-00");
-    if (!((result as unknown) as TxBroadcastResultRejected).error) {
-      await timeout(10000);
-    }
-    result = await deployContract("calendar-01");
-    if (!((result as unknown) as TxBroadcastResultRejected).error) {
-      await timeout(10000);
-    }
+    await deployContract(`calendar`);
+    await deployDay(0);
+    await deployDay(1);
+    await deployDay(2);
   });
 
   it("should accept entry 00 and open door", async () => {
-    let tx = await makeContractCall({
-      contractAddress: stxAddress,
-      contractName: "calendar",
-      functionName: "update-calendar",
-      functionArgs: [uintCV(0), contractPrincipalCV(stxAddress, "calendar-00")],
-      senderKey,
-      network,
-    });
-    let result = await broadcastTransaction(tx, network);
-    await timeout(10000);
-
-    tx = await makeContractCall({
-      contractAddress: stxAddress,
-      contractName: "calendar",
-      functionName: "open-door",
-      functionArgs: [uintCV(0), contractPrincipalCV(stxAddress, "calendar-00")],
-      senderKey,
-      network,
-    });
-    result = await broadcastTransaction(tx, network);
-    console.log(result);
+    await addCalendar(0);
   });
 
   it("should accept entry 01 and open door", async () => {
-    let tx = await makeContractCall({
-      contractAddress: stxAddress,
-      contractName: "calendar",
-      functionName: "update-calendar",
-      functionArgs: [uintCV(1), contractPrincipalCV(stxAddress, "calendar-01")],
-      senderKey,
-      network,
-    });
-    let result = await broadcastTransaction(tx, network);
-    await timeout(10000);
+    await addCalendar(1);
+  });
 
-    tx = await makeContractCall({
-      contractAddress: stxAddress,
-      contractName: "calendar",
-      functionName: "open-door",
-      functionArgs: [uintCV(1), contractPrincipalCV(stxAddress, "calendar-01")],
-      senderKey,
-      network,
-    });
-    result = await broadcastTransaction(tx, network);
-    console.log(result);
+  it("should accept entry 02 and open door", async () => {
+    await addCalendar(2);
   });
 });
