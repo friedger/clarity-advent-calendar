@@ -63,6 +63,10 @@ describe("calendar test suite", () => {
     if (!((result as unknown) as TxBroadcastResultRejected).error) {
       await timeout(10000);
     }
+    result = await deployContract("calendar-01");
+    if (!((result as unknown) as TxBroadcastResultRejected).error) {
+      await timeout(10000);
+    }
   });
 
   it("should accept entry 00 and open door", async () => {
@@ -82,6 +86,30 @@ describe("calendar test suite", () => {
       contractName: "calendar",
       functionName: "open-door",
       functionArgs: [uintCV(0), contractPrincipalCV(stxAddress, "calendar-00")],
+      senderKey,
+      network,
+    });
+    result = await broadcastTransaction(tx, network);
+    console.log(result);
+  });
+
+  it("should accept entry 01 and open door", async () => {
+    let tx = await makeContractCall({
+      contractAddress: stxAddress,
+      contractName: "calendar",
+      functionName: "update-calendar",
+      functionArgs: [uintCV(1), contractPrincipalCV(stxAddress, "calendar-01")],
+      senderKey,
+      network,
+    });
+    let result = await broadcastTransaction(tx, network);
+    await timeout(10000);
+
+    tx = await makeContractCall({
+      contractAddress: stxAddress,
+      contractName: "calendar",
+      functionName: "open-door",
+      functionArgs: [uintCV(1), contractPrincipalCV(stxAddress, "calendar-01")],
       senderKey,
       network,
     });
