@@ -107,8 +107,9 @@ describe("calendar test suite", () => {
   });
 });
 
-describe("testnet", async () => {
-  /*
+describe("testnet", () => {
+  it("should deploy to testnet", async () => {
+    /*
   await deployDay(0);
   await addCalendar(0);
   await deployDay(1);
@@ -116,10 +117,13 @@ describe("testnet", async () => {
   await deployDay(2);
   await addCalendar(2);
   */
-  await deployDay(3);
-  await addCalendar(3);
+    await deployDay(3);
+    await addCalendar(3);
+  });
 });
 
-describe("open door", async () => {
-  await openDoor(3);
+describe("advent calendar", () => {
+  it("should open door", async () => {
+    await openDoor(3);
+  });
 });
