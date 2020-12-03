@@ -15,9 +15,9 @@ const fetch = require("node-fetch");
 
 import { ADDR5, testnetKeyMap } from "./mocknet";
 
-export const local = true;
-export const mocknet = true;
-export const noSidecar = true;
+export const local = false;
+export const mocknet = false;
+export const noSidecar = false;
 
 const STACKS_CORE_API_URL = local
   ? noSidecar
