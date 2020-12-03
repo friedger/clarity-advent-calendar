@@ -45,7 +45,7 @@ async function deployDay(day: number) {
   });
 }
 
-async function openDoor(day: number) {
+async function openDoor(day: number, senderKey) {
   const dayString = day.toString().padStart(2, "0");
   const tx = await makeContractCall({
     contractAddress: calendarAddress,
@@ -55,7 +55,7 @@ async function openDoor(day: number) {
       uintCV(day),
       contractPrincipalCV(doorAddress, `calendar-${dayString}`),
     ],
-    senderKey: secretKey,
+    senderKey,
     network,
   });
   await handleTransaction(tx);
@@ -77,7 +77,7 @@ async function addCalendar(day: number) {
   await handleTransaction(tx);
 
   if (mocknet) {
-    openDoor(day);
+    openDoor(day, secretKey);
   }
 }
 
@@ -126,6 +126,6 @@ describe("testnet", () => {
 
 describe("advent calendar", () => {
   it("should open door", async () => {
-    await openDoor(3);
+    await openDoor(3, "052cc5b8f25b1e44a65329244066f76c8057accd5316c889f476d0ea0329632c01");
   });
 });
