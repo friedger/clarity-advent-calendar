@@ -27,6 +27,8 @@ import { ADDR5 } from "./mocknet";
 const calendarAddress = mocknet
   ? ADDR5
   : "ST3YPJ6BBCZCMH71TV8BK50YC6QJTWEGCNDFWEQ15";
+const doorAddress = mocknet ? ADDR5 : "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV"
+
 const day00 = "'ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV.calendar-00";
 
 async function deployDay(day: number) {
@@ -51,7 +53,7 @@ async function openDoor(day: number) {
     functionName: "open-door",
     functionArgs: [
       uintCV(day),
-      contractPrincipalCV(contractAddress, `calendar-${dayString}`),
+      contractPrincipalCV(doorAddress, `calendar-${dayString}`),
     ],
     senderKey: secretKey,
     network,
