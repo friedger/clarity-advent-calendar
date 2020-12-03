@@ -72,13 +72,16 @@ export async function handleTransaction(transaction: StacksTransaction) {
   return result as TxBroadcastResultOk;
 }
 
-export async function deployContract(contractName: string) {
+export async function deployContract(
+  contractName: string,
+  changeCode: (string) => string
+) {
   const codeBody = fs
     .readFileSync(`./contracts/${contractName}.clar`)
     .toString();
   var transaction = await makeContractDeploy({
     contractName,
-    codeBody: codeBody,
+    codeBody: changeCode(codeBody),
     senderKey: secretKey,
     network,
   });
@@ -132,7 +135,7 @@ async function processingWithSidecar(
   if (mocknet) {
     await timeout(5000);
   } else {
-    await timeout(50000);
+    await timeout(120000);
   }
   return processing(tx, count + 1);
 }
