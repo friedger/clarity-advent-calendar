@@ -1,21 +1,10 @@
 import { describe } from "mocha";
 import {
-  broadcastTransaction,
-  bufferCV,
-  bufferCVFromString,
   contractPrincipalCV,
   makeContractCall,
-  makeContractDeploy,
-  StacksTransaction,
-  standardPrincipalCV,
-  TxBroadcastResultOk,
-  TxBroadcastResultRejected,
   uintCV,
 } from "@stacks/transactions";
-import { StacksTestnet } from "@stacks/network";
-import * as fs from "fs";
 import {
-  contractAddress,
   deployContract,
   handleTransaction,
   mocknet,
@@ -26,17 +15,28 @@ import { ADDR5 } from "./mocknet";
 
 const calendarAddress = mocknet
   ? ADDR5
-  : "ST3YPJ6BBCZCMH71TV8BK50YC6QJTWEGCNDFWEQ15";
-const doorAddress = mocknet ? ADDR5 : "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV"
+  : "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV";
+const doorAddress = mocknet
+  ? ADDR5
+  : "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV";
 
-const day00 = "'ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV.calendar-00";
+const contracts = [
+  "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV.calendar-00",
+  "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV.calendar-01",
+  "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV.calendar-02",
+  "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV.calendar-03",
+  "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV.calendar-04",
+  "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV.calendar-05",
+  "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV.calendar-06",
+  "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV.calendar-07",
+];
 
 async function deployDay(day: number) {
   const dayString = day.toString().padStart(2, "0");
   await deployContract(`calendar-${dayString}`, (codeBody: string) => {
     if (mocknet) {
       return codeBody.replace(
-        /ST3YPJ6BBCZCMH71TV8BK50YC6QJTWEGCNDFWEQ15/g,
+        /ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV/g,
         "ST2ZRX0K27GW0SP3GJCEMHD95TQGJMKB7G9Y0X1MH"
       );
     } else {
@@ -46,15 +46,15 @@ async function deployDay(day: number) {
 }
 
 async function openDoor(day: number, senderKey) {
-  const dayString = day.toString().padStart(2, "0");
+  const parts = contracts[day].split(".");
+  if (mocknet && parts[0] === "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV") {
+    parts[0] = "ST2ZRX0K27GW0SP3GJCEMHD95TQGJMKB7G9Y0X1MH";
+  }
   const tx = await makeContractCall({
     contractAddress: calendarAddress,
     contractName: "advent-calendar",
     functionName: "open-door",
-    functionArgs: [
-      uintCV(day),
-      contractPrincipalCV(doorAddress, `calendar-${dayString}`),
-    ],
+    functionArgs: [uintCV(day), contractPrincipalCV(parts[0], parts[1])],
     senderKey,
     network,
   });
@@ -62,15 +62,15 @@ async function openDoor(day: number, senderKey) {
 }
 
 async function addCalendar(day: number) {
-  const dayString = day.toString().padStart(2, "0");
+  const parts = contracts[day].split(".");
+  if (mocknet && parts[0] === "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV") {
+    parts[0] = "ST2ZRX0K27GW0SP3GJCEMHD95TQGJMKB7G9Y0X1MH";
+  }
   let tx = await makeContractCall({
     contractAddress: calendarAddress,
     contractName: "advent-calendar",
     functionName: "update-calendar",
-    functionArgs: [
-      uintCV(day),
-      contractPrincipalCV(contractAddress, `calendar-${dayString}`),
-    ],
+    functionArgs: [uintCV(day), contractPrincipalCV(parts[0], parts[1])],
     senderKey: secretKey,
     network,
   });
@@ -84,12 +84,15 @@ async function addCalendar(day: number) {
 describe("calendar test suite", () => {
   before("deploys", async () => {
     await deployContract("advent-calendar", (code) => code);
-    /*
+    /* */
     await deployDay(0);
     await deployDay(1);
     await deployDay(2);
-    */
     await deployDay(3);
+    await deployDay(4);
+    await deployDay(5);
+    await deployDay(6);
+    await deployDay(7);
   });
 
   it("should accept entry 00 and open door", async () => {
@@ -107,25 +110,50 @@ describe("calendar test suite", () => {
   it("should accept entry 03 and open door", async () => {
     await addCalendar(3);
   });
+
+  it("should accept entry 04 and open door", async () => {
+    await addCalendar(4);
+  });
+
+  it("should accept entry 05 and open door", async () => {
+    await addCalendar(5);
+  });
+
+  it("should accept entry 06 and open door", async () => {
+    await addCalendar(6);
+  });
+
+  it("should accept entry 07 and open door", async () => {
+    await addCalendar(7);
+  });
 });
 
 describe("testnet", () => {
   it("should deploy to testnet", async () => {
-    /*
-  await deployDay(0);
-  await addCalendar(0);
-  await deployDay(1);
-  await addCalendar(1);
-  await deployDay(2);
-  await addCalendar(2);
-  */
+    await deployDay(0);
+    await addCalendar(0);
+    await deployDay(1);
+    await addCalendar(1);
+    await deployDay(2);
+    await addCalendar(2);
     await deployDay(3);
     await addCalendar(3);
+    await deployDay(4);
+    await addCalendar(4);
+    await deployDay(5);
+    await addCalendar(5);
+    await deployDay(6);
+    await addCalendar(6);
+    await deployDay(7);
+    await addCalendar(7);
   });
 });
 
 describe("advent calendar", () => {
   it("should open door", async () => {
-    await openDoor(3, "052cc5b8f25b1e44a65329244066f76c8057accd5316c889f476d0ea0329632c01");
+    await openDoor(
+      4,
+      "052cc5b8f25b1e44a65329244066f76c8057accd5316c889f476d0ea0329632c01" // replace with your key
+    );
   });
 });

@@ -1,4 +1,4 @@
-(impl-trait 'ST3YPJ6BBCZCMH71TV8BK50YC6QJTWEGCNDFWEQ15.advent-calendar.door-trait)
+(impl-trait 'ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV.advent-calendar.door-trait)
 
 (define-data-var msg (string-utf8 4000) u"Look at the logs of your node and have a nice Advent season!")
 (define-read-only (open)
