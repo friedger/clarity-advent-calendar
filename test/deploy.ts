@@ -14,6 +14,7 @@ import * as fs from "fs";
 const fetch = require("node-fetch");
 
 import { ADDR5, testnetKeyMap } from "./mocknet";
+import { secretKey } from "./private-settings";
 
 export const local = false;
 export const mocknet = false;
@@ -29,19 +30,6 @@ export const STACKS_API_URL = local
   : "https://stacks-node-api.blockstack.org";
 export const network = new StacksTestnet();
 network.coreApiUrl = STACKS_CORE_API_URL;
-
-/* Replace with your private key for testnet deployment */
-
-const keys = mocknet
-  ? testnetKeyMap[ADDR5]
-  : JSON.parse(
-      fs
-        .readFileSync("../../blockstack/stacks-blockchain/keychain.json")
-        .toString()
-    ).paymentKeyInfo;
-
-export const secretKey = mocknet ? keys.secretKey : keys.privateKey;
-export const contractAddress = mocknet ? keys.address : keys.address.STACKS;
 
 //
 export async function handleTransaction(transaction: StacksTransaction) {

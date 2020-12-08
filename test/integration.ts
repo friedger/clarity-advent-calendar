@@ -9,9 +9,10 @@ import {
   handleTransaction,
   mocknet,
   network,
-  secretKey,
 } from "./deploy";
+
 import { ADDR5 } from "./mocknet";
+import { secretKey } from "./private-settings";
 
 const calendarAddress = mocknet
   ? ADDR5
@@ -157,14 +158,5 @@ describe("testnet", () => {
     await deployDay(8);
     await addCalendar(8);
     */
-  });
-});
-
-describe("advent calendar", () => {
-  it("should open door", async () => {
-    await openDoor(
-      8,
-      "052cc5b8f25b1e44a65329244066f76c8057accd5316c889f476d0ea0329632c01" // replace with your key
-    );
   });
 });
