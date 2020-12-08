@@ -29,6 +29,7 @@ const contracts = [
   "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV.calendar-05",
   "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV.calendar-06",
   "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV.calendar-07",
+  "ST12EY99GS4YKP0CP2CFW6SEPWQ2CGVRWK5GHKDRV.calendar-08",
 ];
 
 async function deployDay(day: number) {
@@ -93,6 +94,7 @@ describe("calendar test suite", () => {
     await deployDay(5);
     await deployDay(6);
     await deployDay(7);
+    await deployDay(8);
   });
 
   it("should accept entry 00 and open door", async () => {
@@ -126,10 +128,16 @@ describe("calendar test suite", () => {
   it("should accept entry 07 and open door", async () => {
     await addCalendar(7);
   });
+
+  it("should accept entry 08 and open door", async () => {
+    await addCalendar(8);
+  });
 });
 
 describe("testnet", () => {
   it("should deploy to testnet", async () => {
+    //await deployContract("advent-calendar", (code) => code);
+    /*
     await deployDay(0);
     await addCalendar(0);
     await deployDay(1);
@@ -146,13 +154,16 @@ describe("testnet", () => {
     await addCalendar(6);
     await deployDay(7);
     await addCalendar(7);
+    await deployDay(8);
+    await addCalendar(8);
+    */
   });
 });
 
 describe("advent calendar", () => {
   it("should open door", async () => {
     await openDoor(
-      4,
+      8,
       "052cc5b8f25b1e44a65329244066f76c8057accd5316c889f476d0ea0329632c01" // replace with your key
     );
   });
