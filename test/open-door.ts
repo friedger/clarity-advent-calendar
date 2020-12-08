@@ -43,7 +43,7 @@ describe("advent calendar", () => {
   it("should open door", async () => {
     await openDoor(
       8,
-      "" // replace with your key
+      "052cc5b8f25b1e44a65329244066f76c8057accd5316c889f476d0ea0329632c01" // replace with your key
     );
   });
 });
